@@ -17,4 +17,7 @@
     <string name="oops_we_were_unable_to_load_page">Oops, we were unable to load page.</string>
     <string name="try_again">Try again</string>
     <string name="join_zoom">Join Zoom</string>
+    <string name="login_successful">Login Successful</string>
+    <string name="sign_in_failed">Sign in Failed</string>
+    <string name="sign_in_failed_connection_error">Sign in Failed: Connection Error</string>
 </resources>

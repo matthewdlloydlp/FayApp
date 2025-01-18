@@ -1,7 +1,6 @@
 package com.ml.fay
 
 import android.content.SharedPreferences
-import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -20,7 +19,6 @@ class SessionManager(private val prefs: SharedPreferences) {
     }
 
     fun deleteAuthToken() {
-        Log.d("matt123", "delete auth token")
         _isUserLoggedIn.tryEmit(false)
         prefs.edit().remove(USER_TOKEN).apply()
     }

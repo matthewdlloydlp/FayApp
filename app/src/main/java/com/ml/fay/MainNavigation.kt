@@ -1,6 +1,6 @@
 package com.ml.fay
 
-import android.util.Log
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,7 +23,6 @@ fun MainNavigation(
     NavHost(navController = navController, startDestination = initialRoute) {
         composable(Screen.LoginScreen.route) {
             LoginScreen {
-                Log.d("matt123", "Main Navigation, nav to appointments")
                 navController.navigate(Screen.AppointmentsList.route)
             }
         }

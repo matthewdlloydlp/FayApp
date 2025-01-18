@@ -56,22 +56,30 @@ fun LoginScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.messages.collect() {
-            Log.d("matt123", "messages: $it")
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        viewModel.messages.collect {
+            Toast.makeText(context, context.getString(it.id), Toast.LENGTH_SHORT).show()
         }
     }
     LaunchedEffect(Unit) {
         viewModel.navigationEvents.collect {
-            Log.d("matt123", "nav event: $it")
             onLoginSuccess()
         }
     }
 
     when (uiState) {
         is LoginUiState.Success -> {
-            // show some sort of splash screen
-            Text("success")
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.fay_no_background),
+                    contentDescription = stringResource(R.string.app_logo),
+                    modifier = Modifier
+                        .size(200.dp)
+                        .padding(bottom = 32.dp)
+                )
+            }
         }
 
         is LoginUiState.Base -> {

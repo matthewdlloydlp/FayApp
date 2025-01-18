@@ -9,7 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.util.Date
 import javax.inject.Inject
 
@@ -33,18 +32,13 @@ class AppointmentsViewModel @Inject constructor(
             try {
                 val response = appointmentsRepository.getAppointments()
                 if (response.isSuccessful) {
-                    response.body()?.let {
-                        val (upcoming, past) = it.appointments.partition {
+                    response.body().let {
+                        val (upcoming, past) = it?.appointments.orEmpty().partition {
                             it.start.before(Date())
                         }
-
                         _uiState.emit(
                             AppointmentsUiState.Success(upcoming.reversed(), past.reversed())
                         )
-                    } ?: run {
-                        // handle null product
-                        val errorMsg = "Error: Unable to retrieve product"
-                        _uiState.emit(AppointmentsUiState.Error(Exception(errorMsg)))
                     }
                 } else {
                     val errorMsg = "Error: ${response.code()} ${response.message()}"

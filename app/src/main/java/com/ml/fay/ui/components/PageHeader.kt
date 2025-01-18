@@ -15,7 +15,7 @@ import com.ml.fay.ui.theme.UiConstants
 fun ColumnScope.PageHeader(title: String, showDivider: Boolean = false) {
     Text(
         title,
-        style = MaterialTheme.typography.headlineLarge,
+        style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.ExtraBold,
         color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.padding(UiConstants.screenPadding)
