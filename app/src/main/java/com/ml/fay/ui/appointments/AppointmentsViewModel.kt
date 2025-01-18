@@ -33,11 +33,11 @@ class AppointmentsViewModel @Inject constructor(
                 val response = appointmentsRepository.getAppointments()
                 if (response.isSuccessful) {
                     response.body().let {
-                        val (upcoming, past) = it?.appointments.orEmpty().partition {
+                        val (past, upcoming) = it?.appointments.orEmpty().partition {
                             it.start.before(Date())
                         }
                         _uiState.emit(
-                            AppointmentsUiState.Success(upcoming.reversed(), past.reversed())
+                            AppointmentsUiState.Success(upcoming, past)
                         )
                     }
                 } else {
@@ -45,6 +45,7 @@ class AppointmentsViewModel @Inject constructor(
                     _uiState.emit(AppointmentsUiState.Error(Exception(errorMsg)))
                 }
             } catch (e: Exception) {
+                println(e.message)
                 val errorMsg = "Error: Connection issue"
                 _uiState.emit(AppointmentsUiState.Error(Exception(errorMsg)))
             }
