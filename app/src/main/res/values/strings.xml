@@ -10,4 +10,7 @@
     <string name="app_logo">App Logo</string>
     <string name="sign_out">Sign Out</string>
     <string name="signed_out">Signed Out</string>
+    <string name="appointments">Appointments</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="past">Past</string>
 </resources>

@@ -8,6 +8,7 @@ import com.ml.fay.R
 import com.ml.fay.SessionManager
 import com.ml.fay.api.AuthInterceptor
 import com.ml.fay.api.FayApi
+import com.ml.fay.api.ISODateDeserializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,7 +17,9 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.Date
 import javax.inject.Singleton
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -25,12 +28,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideGson(): Gson = GsonBuilder().create()
+    fun provideGson(): Gson = GsonBuilder()
+        .registerTypeAdapter(Date::class.java, ISODateDeserializer()).create()
 
     @Provides
     @Singleton
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE)
+        return context.getSharedPreferences(
+            context.getString(R.string.app_name),
+            Context.MODE_PRIVATE
+        )
     }
 
     @Provides

@@ -1,6 +1,7 @@
 package com.ml.fay.data
 
 import com.google.gson.annotations.SerializedName
+import java.util.Date
 
 data class Appointment(
     @SerializedName("appointment_id")
@@ -10,7 +11,7 @@ data class Appointment(
     @SerializedName("duration_in_minutes")
     val durationInMinutes: Int = 0,
     @SerializedName("end")
-    val end: String = "",
+    val end: Date,
     @SerializedName("patient_id")
     val patientId: String = "",
     @SerializedName("provider_id")
@@ -18,7 +19,7 @@ data class Appointment(
     @SerializedName("recurrence_type")
     val recurrenceType: String = "",
     @SerializedName("start")
-    val start: String = "",
+    val start: Date,
     @SerializedName("status")
     val status: String = ""
 )

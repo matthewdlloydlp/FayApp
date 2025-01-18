@@ -9,11 +9,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.Date
 import javax.inject.Inject
 
 
 @HiltViewModel
-class AppointmentsViewModel  @Inject constructor(
+class AppointmentsViewModel @Inject constructor(
     private val appointmentsRepository: AppointmentsRepository,
     private val sessionManager: SessionManager
 ) : ViewModel() {
@@ -25,14 +27,18 @@ class AppointmentsViewModel  @Inject constructor(
         getAppointments()
     }
 
-    fun getAppointments(){
+    fun getAppointments() {
         viewModelScope.launch {
             try {
                 val response = appointmentsRepository.getAppointments()
                 if (response.isSuccessful) {
                     response.body()?.let {
+                        val (upcoming, past) = it.appointments.partition {
+                            it.start.before(Date())
+                        }
+
                         _uiState.emit(
-                            AppointmentsUiState.Success(it.appointments)
+                            AppointmentsUiState.Success(upcoming, past)
                         )
                     } ?: run {
                         // handle null product
@@ -58,5 +64,8 @@ class AppointmentsViewModel  @Inject constructor(
 sealed interface AppointmentsUiState {
     object Loading : AppointmentsUiState
     data class Error(val throwable: Throwable) : AppointmentsUiState
-    data class Success(val data: List<Appointment>) : AppointmentsUiState
+    data class Success(
+        val upcoming: List<Appointment>,
+        val past: List<Appointment>
+    ) : AppointmentsUiState
 }
