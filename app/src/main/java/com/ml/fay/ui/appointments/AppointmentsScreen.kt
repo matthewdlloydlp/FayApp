@@ -3,6 +3,7 @@ package com.ml.fay.ui.appointments
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -13,7 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -26,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -104,6 +107,8 @@ internal fun ColumnScope.AppointmentsScreen(
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf(stringResource(R.string.upcoming), stringResource(R.string.past))
+    val upcomingListState = rememberLazyListState()
+    val pastListState = rememberLazyListState()
 
     Box(contentAlignment = Alignment.BottomCenter) {
         UnderlinedTabView(
@@ -113,10 +118,11 @@ internal fun ColumnScope.AppointmentsScreen(
         )
         HorizontalDivider(thickness = 1.dp)
     }
+
     // Show the content for the selected tab
     when (selectedTabIndex) {
-        0 -> AppointmentsList(futureAppointments)
-        1 -> AppointmentsList(pastAppointments)
+        0 -> AppointmentsList(futureAppointments, upcomingListState)
+        1 -> AppointmentsList(pastAppointments, pastListState)
     }
 
 
@@ -137,13 +143,16 @@ internal fun ColumnScope.AppointmentsScreen(
 
 @Composable
 internal fun AppointmentsList(
-    appointments: List<Appointment>
+    appointments: List<Appointment>,
+    listState: LazyListState
 ) {
+    val expandedStates = remember { mutableStateOf(mutableMapOf<String, Boolean>()) }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = UiConstants.screenPadding),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        state = listState
     ) {
         item {
             Spacer(Modifier.height(16.dp))
@@ -154,14 +163,20 @@ internal fun AppointmentsList(
             }
         ) { index ->
             val appointment = appointments[index]
-            AppointmentRow(appointment)
+            AppointmentRow(appointment, expandedStates.value[appointment.appointmentId]) {
+                expandedStates.value = expandedStates.value.toMutableMap().apply {
+                    this[appointment.appointmentId] = !(this[appointment.appointmentId] ?: false)
+                }
+            }
         }
     }
 }
 
 @Composable
 internal fun AppointmentRow(
-    appointment: Appointment
+    appointment: Appointment,
+    isExpanded: Boolean?,
+    handleAppointmentClicked: (String) -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(UiConstants.cardCornerRadius),
@@ -169,8 +184,9 @@ internal fun AppointmentRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
+            .clickable { handleAppointmentClicked(appointment.appointmentId) }
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
                 .fillMaxWidth()
@@ -178,37 +194,60 @@ internal fun AppointmentRow(
                     UiConstants.cardPadding
                 )
         ) {
-            DateSquare(appointment.start)
-            Column(modifier = Modifier.padding(horizontal = UiConstants.cardPadding)) {
-                Text(
-                    "${appointment.appointmentType} with Taylor Palmer, RD",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.ExtraBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    appointment.start.toTimeRangeStringWithTimezone(appointment.end),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Row {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_sync),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        contentDescription = stringResource(R.string.sync_icon)
+            Row {
+                DateSquare(appointment.start)
+                Column(modifier = Modifier.padding(horizontal = UiConstants.cardPadding)) {
+                    Text(
+                        "${appointment.appointmentType} with Taylor Palmer, RD",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        appointment.recurrenceType,
+                        appointment.start.toTimeRangeStringWithTimezone(appointment.end),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(start = UiConstants.elementSpacing)
+                        overflow = TextOverflow.Ellipsis
                     )
+                    Row {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_sync),
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            contentDescription = stringResource(R.string.sync_icon)
+                        )
+                        Text(
+                            appointment.recurrenceType,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(start = UiConstants.elementSpacing)
+                        )
+                    }
+                }
+            }
+            if (isExpanded == true) {
+                Spacer(Modifier.height(UiConstants.cardPadding))
+                Button(
+                    onClick = { /* no op */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                    shape = RoundedCornerShape(UiConstants.buttonCornerRadius)
+                ) {
+                    Row {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_video),
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            contentDescription = stringResource(R.string.sync_icon),
+                            modifier = Modifier.padding(end = UiConstants.elementSpacing)
+                        )
+                        Text(text = stringResource(R.string.join_zoom), fontSize = 16.sp)
+                    }
                 }
             }
         }

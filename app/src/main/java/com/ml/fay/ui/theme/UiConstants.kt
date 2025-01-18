@@ -11,6 +11,7 @@ interface UiConstants {
         val elementSpacing: Dp = 8.dp
 
         val cardCornerRadius: Dp = 16.dp
+        val buttonCornerRadius: Dp = 8.dp
     }
 
 }
