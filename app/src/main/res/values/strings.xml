@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Fay</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="enter_your_password">Enter your password</string>
+    <string name="password">Password</string>
+    <string name="enter_your_username">Enter your username</string>
+    <string name="username">Username</string>
+    <string name="login">Login</string>
+    <string name="app_logo">App Logo</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="signed_out">Signed Out</string>
+</resources>
