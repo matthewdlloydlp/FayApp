@@ -8,6 +8,9 @@ Highlights:
 
 -Retrofit, GSON
 
+I added an auth interceptor to retrofit to add the token to requests
+Added a session manager class to manage the login state between sessions.
+
 For fun:
 
 -Unit tests for ViewModels
