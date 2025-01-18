@@ -29,6 +29,7 @@ class AppointmentsViewModel @Inject constructor(
 
     fun getAppointments() {
         viewModelScope.launch {
+            _uiState.tryEmit(AppointmentsUiState.Loading)
             try {
                 val response = appointmentsRepository.getAppointments()
                 if (response.isSuccessful) {
@@ -38,7 +39,7 @@ class AppointmentsViewModel @Inject constructor(
                         }
 
                         _uiState.emit(
-                            AppointmentsUiState.Success(upcoming, past)
+                            AppointmentsUiState.Success(upcoming.reversed(), past.reversed())
                         )
                     } ?: run {
                         // handle null product

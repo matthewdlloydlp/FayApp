@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ml.fay.ui.theme.UiConstants
 
 @Composable
 fun ColumnScope.PageHeader(title: String, showDivider: Boolean = false) {

@@ -13,4 +13,7 @@
     <string name="appointments">Appointments</string>
     <string name="upcoming">Upcoming</string>
     <string name="past">Past</string>
+    <string name="sync_icon">sync icon</string>
+    <string name="oops_we_were_unable_to_load_page">Oops, we were unable to load page.</string>
+    <string name="try_again">Try again</string>
 </resources>

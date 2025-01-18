@@ -2,43 +2,51 @@ package com.ml.fay.ui.appointments
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ml.fay.R
-import com.ml.fay.Screen
 import com.ml.fay.data.Appointment
+import com.ml.fay.extensions.toTimeRangeStringWithTimezone
+import com.ml.fay.ui.components.DateSquare
 import com.ml.fay.ui.components.FayHeader
+import com.ml.fay.ui.components.FullScreenDisplayError
 import com.ml.fay.ui.components.PageHeader
-import com.ml.fay.ui.components.UiConstants
+import com.ml.fay.ui.theme.UiConstants
 import com.ml.fay.ui.components.UnderlinedTabView
 
 @Composable
@@ -70,10 +78,9 @@ fun AppointmentsScreen(
             }
 
             is AppointmentsUiState.Error -> {
-//            FullScreenDisplayError {
-//                viewModel.getDeals()
-//            }
-                Text("error")
+                FullScreenDisplayError {
+                    viewModel.getAppointments()
+                }
             }
 
             AppointmentsUiState.Loading -> {
@@ -113,12 +120,18 @@ internal fun ColumnScope.AppointmentsScreen(
     }
 
 
+    // sign out button
     Spacer(Modifier.height(32.dp))
-    Button(
-        onClick = { handleSignOutClicked() },
-        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(text = stringResource(R.string.sign_out), fontSize = 16.sp)
+        Button(
+            onClick = { handleSignOutClicked() },
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+        ) {
+            Text(text = stringResource(R.string.sign_out), fontSize = 16.sp)
+        }
     }
 }
 
@@ -128,16 +141,20 @@ internal fun AppointmentsList(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(horizontal = UiConstants.screenPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        item {
+            Spacer(Modifier.height(16.dp))
+        }
         items(appointments.size,
             { index ->
                 appointments[index].appointmentId
             }
         ) { index ->
             val appointment = appointments[index]
-            Text(appointment.appointmentId)
+            AppointmentRow(appointment)
         }
     }
 }
@@ -148,8 +165,52 @@ internal fun AppointmentRow(
 ) {
     Card(
         shape = RoundedCornerShape(UiConstants.cardCornerRadius),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
     ) {
-
+        Row(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxWidth()
+                .padding(
+                    UiConstants.cardPadding
+                )
+        ) {
+            DateSquare(appointment.start)
+            Column(modifier = Modifier.padding(horizontal = UiConstants.cardPadding)) {
+                Text(
+                    "${appointment.appointmentType} with Taylor Palmer, RD",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.ExtraBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    appointment.start.toTimeRangeStringWithTimezone(appointment.end),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Row {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_sync),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = stringResource(R.string.sync_icon)
+                    )
+                    Text(
+                        appointment.recurrenceType,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(start = UiConstants.elementSpacing)
+                    )
+                }
+            }
+        }
     }
 }
